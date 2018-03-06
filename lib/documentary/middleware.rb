@@ -10,7 +10,7 @@ module Documentary
       @response = ActionDispatch::Response.new
 
       if describe_params?
-        response.body = formatted_params
+        prepare_response
         response.to_a
       else
         app.call(env)
@@ -20,6 +20,11 @@ module Documentary
     private
 
     attr_reader :app, :request, :response
+
+    def prepare_response
+      response.content_type = request.format.send(:string)
+      response.body = formatted_params
+    end
 
     def describe_params?
       request.headers['Describe-Params']
