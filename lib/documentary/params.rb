@@ -1,4 +1,3 @@
-
 module Documentary
   module Params
     def params(action = nil, **_args, &block)
@@ -10,13 +9,31 @@ module Documentary
 
       @params ||= {}
       @params[action] = ParamBuilder.build(&block)
-
-      puts @params.inspect
       @params
     end
 
-    def print_params
-      @params
+    def to_strong(action)
+      recursive_each(@params[action])
+    end
+
+    def recursive_each(hash)
+      hash.map do |key, value|
+        if nested_hash?(value)
+          { key => recursive_each(value) }
+        else
+          if value.is_a?(Hash)
+            if value[:type] == Array.to_s
+              { key => [] }
+            else
+              key
+            end
+          end
+        end
+      end.compact
+    end
+
+    def nested_hash?(value)
+      value.is_a?(Hash) && !(value.keys - %i[type desc required]).empty?
     end
   end
 
@@ -31,25 +48,25 @@ module Documentary
       @hash = {}
     end
 
-    def required(meth, **args, &block)
-      build(meth, required: true, **args, &block)
+    def required(param, **args, &block)
+      build(param, required: true, **args, &block)
     end
 
-    def optional(meth, **args, &block)
-      build(meth, required: false, **args, &block)
+    def optional(param, **args, &block)
+      build(param, required: false, **args, &block)
     end
 
     private
 
-    def build(meth, required:, type: 'Any', desc: nil, &block)
-      hash[meth] = if block
-                     self.class.build(&block)
-                   else
-                     {}
-                   end
-      hash[meth][:type] = type.to_s
-      hash[meth][:desc] = desc
-      hash[meth][:required] = required
+    def build(param, required:, type: 'Any', desc: nil, &block)
+      hash[param] = if block
+                      self.class.build(&block)
+                    else
+                      {}
+                    end
+      hash[param][:type] = type.to_s
+      hash[param][:desc] = desc
+      hash[param][:required] = required
     end
   end
 end
