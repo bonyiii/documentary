@@ -1,51 +1,27 @@
 module Documentary
   module Params
     def params(action = nil, **_args, &block)
-      return @params unless action
+      return @store unless action
 
       unless public_method_defined?(action)
         raise(Documentary::PublicMethodMissing, "'#{self}' has no public instance method '#{action}' defined!")
       end
 
-      @params ||= {}
-      @params[action] = ParamBuilder.build(&block)
-      @params
-    end
-
-    def to_strong(action)
-      recursive_each(@params[action])
-    end
-
-    def recursive_each(hash)
-      hash.map do |key, value|
-        if nested_hash?(value)
-          { key => recursive_each(value) }
-        else
-          if value.is_a?(Hash)
-            if value[:type] == Array.to_s
-              { key => [] }
-            else
-              key
-            end
-          end
-        end
-      end.compact
-    end
-
-    def nested_hash?(value)
-      value.is_a?(Hash) && !(value.keys - %i[type desc required]).empty?
+      @store ||= Store.new
+      @store[action] = ParamBuilder.build(&block)
+      @store
     end
   end
 
   class ParamBuilder
-    attr_reader :hash
+    attr_reader :store
 
     def self.build(&block)
-      new.tap { |param_builder| param_builder.instance_eval(&block) }.hash
+      new.tap { |param_builder| param_builder.instance_eval(&block) }.store
     end
 
     def initialize
-      @hash = {}
+      @store = Store.new
     end
 
     def required(param, **args, &block)
@@ -58,15 +34,12 @@ module Documentary
 
     private
 
-    def build(param, required:, type: 'Any', desc: nil, &block)
-      hash[param] = if block
-                      self.class.build(&block)
-                    else
-                      {}
-                    end
-      hash[param][:type] = type.to_s
-      hash[param][:desc] = desc
-      hash[param][:required] = required
+    def build(param, required:, type: nil, desc: nil, &block)
+      store[param] = block ? self.class.build(&block) : Store.new
+
+      store[param][:required] = required
+      store[param][:type] = type.to_s if type
+      store[param][:desc] = desc if desc
     end
   end
 end

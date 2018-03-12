@@ -5,7 +5,6 @@ module Documentary
     end
 
     def call(env)
-      # req = Rack::Request.new(env)
       @request = ActionDispatch::Request.new(env)
       @response = ActionDispatch::Response.new
 
