@@ -2,9 +2,7 @@
 
 # Documentary
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/documentary`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Documentary provides "living" API documentation for your application.
 
 ## Installation
 
@@ -24,17 +22,53 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Include Documentar in your controller:
 
-## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+``` ruby
+class ApplicationController < ActionController::Base
+  include Documentary::Params
+  protect\_from\_forgery
+end
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+You can define params for each action in your controller:
 
-## Contributing
+``` ruby
+class CarsController < ApplicationController
+  def create
+  end
+  params :create do
+    required :name, type: String, desc: "Name of car"
+    required "vintage(1i)", type: String, desc: "Year"
+    required "vintage(2i)", type: String, desc: "Month"
+    optional "vintage(3i)", type: String, desc: "Day"
+  end
+end
+```
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/documentary. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+By default param names should be symbols but strings are allowed too.
+A param can be:
+  - optional
+  - required
+
+A param definition consist the following elements:
+
+  - name: Name of the argument (compulsory)
+  - Keyword arguments (all are optional):
+	  - type: Can be anything that respond to to_s
+	  - desc: Describe what the given parameter does
+	  - if: Response will include the given param if evaluated true
+		  -  Expects a symbol or a proc, any kind of authorization logic can be implemented.
+		  - For proc will receive controller instance as input parameter.
+		  - For symbol it will call an instance method with that name on the controller
+
+## Compatibility
+
+
+- [X] Strong Paramters
+- [ ] Authorization
+- [ ] Swagger compatible output
 
 ## License
 
