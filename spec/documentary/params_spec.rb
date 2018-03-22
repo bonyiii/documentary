@@ -1,9 +1,10 @@
 require 'spec_helper'
+require 'action_controller'
 
 # Test controller to emaulte a class in which
 # Documentary::Params can be mixed in
-class TestController
-  extend Documentary::Params
+class TestController < ActionController::Base
+  include Documentary::Params
   def show; end
 end
 
@@ -22,6 +23,7 @@ RSpec.describe Documentary::Params do
 
   describe '#params' do
     context 'when params defined below method' do
+      # Eg:
       # def index
       # end
       # params :index do
@@ -46,6 +48,7 @@ RSpec.describe Documentary::Params do
     end
 
     context 'when params is defined above method' do
+      # Eg:
       # params :index do
       #   required :name
       # end
