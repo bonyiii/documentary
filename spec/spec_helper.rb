@@ -1,5 +1,6 @@
 require 'bundler/setup'
 require 'documentary'
+require 'action_controller'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -11,4 +12,11 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+end
+
+# Test controller to emaulte a class in which
+# Documentary::Params can be mixed in
+class TestController < ActionController::Base
+  include Documentary::Params
+  def show; end
 end

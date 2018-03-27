@@ -6,7 +6,26 @@ module Documentary
       recursive_each(self)
     end
 
+    def authorized
+      dup.tap { |store| make_sure_top_level_keys_included(store.delete_unauthorized) }
+    end
+
+    protected
+
+    def delete_unauthorized
+      delete_if do |k, v|
+        next unless v.instance_of?(Store)
+        (v[:if] && !v[:if].call) || v.delete_unauthorized.empty?
+      end
+    end
+
     private
+
+    def make_sure_top_level_keys_included(allowed_params)
+      each_key do |key|
+        allowed_params[key] = Store.new unless allowed_params[key]
+      end
+    end
 
     def recursive_each(hash)
       hash.map do |key, value|
@@ -25,7 +44,7 @@ module Documentary
     end
 
     def nested?(value)
-      value.is_a?(Hash) && !(value.keys - %i[type desc required]).empty?
+      value.is_a?(Hash) && !(value.keys - %i[type desc required if]).empty?
     end
   end
 end

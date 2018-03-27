@@ -6,7 +6,7 @@ module Documentary
       before_action :describe_params
 
       def self.params(action = nil, **_args, &block)
-        return @store unless action
+        return @store.authorized unless action
 
         unless public_method_defined?(action)
           raise(Documentary::PublicMethodMissing, "'#{self}' has no public instance method '#{action}' defined!")
@@ -35,6 +35,7 @@ module Documentary
   end
 
   class ParamBuilder
+    VALID_OPTIONS = [:if].freeze # :nodoc:
     attr_reader :store
 
     def self.build(&block)
@@ -55,12 +56,18 @@ module Documentary
 
     private
 
-    def build(param, required:, type: nil, desc: nil, &block)
+    def build(param, required:, type: nil, desc: nil, **args, &block)
+      args.each_key do |k|
+        unless VALID_OPTIONS.include?(k)
+          raise ArgumentError.new("Unknown key for Documentary param: #{k.inspect}. Valid keys are: #{VALID_OPTIONS.map(&:inspect).join(', ')}.")
+        end
+      end
       store[param] = block ? self.class.build(&block) : Store.new
 
       store[param][:required] = required
       store[param][:type] = type.to_s if type
       store[param][:desc] = desc if desc
+      store[param][:if] = args[:if] if args[:if]
     end
   end
 end

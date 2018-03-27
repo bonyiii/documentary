@@ -1,12 +1,4 @@
 require 'spec_helper'
-require 'action_controller'
-
-# Test controller to emaulte a class in which
-# Documentary::Params can be mixed in
-class TestController < ActionController::Base
-  include Documentary::Params
-  def show; end
-end
 
 RSpec.describe Documentary::Params do
   subject { TestController }
@@ -29,13 +21,14 @@ RSpec.describe Documentary::Params do
       # params :index do
       #   required :name
       # end
-
       before do
         expect(Documentary::ParamBuilder).to receive(:build) do
           { type: 'Foo', vintage: 'Bar' }
         end
         expect(subject).to receive(:public_method_defined?).and_return(true)
       end
+
+      after { TestController.instance_eval { @store.delete(:edit) } }
 
       it 'should good to go' do
         expect { subject.params(:edit) }.not_to raise_error
@@ -54,7 +47,6 @@ RSpec.describe Documentary::Params do
       # end
       # def index
       # end
-
       before { expect(subject).to receive(:public_method_defined?).and_return(false) }
 
       it 'should blow up' do
@@ -112,6 +104,85 @@ RSpec.describe Documentary::Params do
       it { expect(subject.params[:show][:vintage][:type]).to eq(Array.to_s) }
       it { expect(subject.params[:show][:vintage][:year][:required]).to eq(true) }
       it { expect(subject.params[:show][:vintage][:day][:required]).to eq(false) }
+    end
+
+    context 'authorization' do
+      it 'should raise error for invalid option' do
+        expect do
+          subject.params :show do
+            optional(:type, not_defined: ->(controller) { controller.to_s })
+          end
+        end.to raise_error ArgumentError
+      end
+
+      context 'when only a single param which is not authorized present' do
+        let(:year_desc) { 'Year of the vintage' }
+
+        before do
+          subject.params :show do
+            optional(:type, if: -> { false })
+          end
+        end
+
+        it { expect(subject.params[:show]).not_to include(:type) }
+        it { expect(subject.params[:edit]).not_to be }
+      end
+
+      context 'when two method defined, one with a single
+               param which is not allowed for current user and
+               another with a param which is allowed for anyone' do
+        let(:year_desc) { 'Year of the vintage' }
+
+        before do
+          subject.params :show do
+            optional(:type, if: -> { false })
+          end
+
+          # Set up edit method here
+          expect(Documentary::ParamBuilder).to receive(:build) do
+            { type: 'Foo', vintage: 'Bar' }
+          end
+          expect(subject).to receive(:public_method_defined?).and_return(true)
+          subject.params(:edit)
+        end
+
+        after { TestController.instance_eval { @store.delete(:edit) } }
+
+        it { expect(subject.params[:show]).not_to include(:type) }
+        it { expect(subject.params[:edit]).to include(:type) }
+      end
+
+      context 'without nested params' do
+        let(:year_desc) { 'Year of the vintage' }
+
+        before do
+          subject.params :show do
+            optional(:type, if: -> { false })
+            required :name
+          end
+        end
+
+        it { expect(subject.params[:show]).not_to include(:type) }
+      end
+
+      context 'with nested params' do
+        let(:year_desc) { 'Year of the vintage' }
+
+        before do
+          subject.params :show do
+            optional(:type)
+            required(:vintage, type: Array) do
+              required(:year, type: Integer, desc: 'Year of the vintage', if: -> { false })
+              optional(:month, type: Integer)
+            end
+          end
+        end
+
+        it { expect(subject.params[:show][:vintage]).not_to include(:year) }
+        it { expect(subject.params[:show][:vintage]).to include(:month) }
+        it { expect(subject.params[:show]).to include(:type) }
+        it { expect(subject.params[:edit]).not_to be }
+      end
     end
   end
 end

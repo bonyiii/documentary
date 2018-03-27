@@ -1,10 +1,5 @@
 require 'spec_helper'
 
-class TestController
-  extend Documentary::Params
-  def show; end
-end
-
 RSpec.describe Documentary::Store do
   context 'when store object defined directly' do
     describe '#to_strong' do
@@ -98,5 +93,6 @@ RSpec.describe Documentary::Store do
         }
       end
     end
+
   end
 end
