@@ -6,7 +6,7 @@ module Documentary
       before_action :describe_params, if: :describe_params?
 
       def self.params(action = nil, **_args, &block)
-        return @store.authorized_params unless action
+        return @store unless action
 
         unless public_method_defined?(action)
           raise(Documentary::PublicMethodMissing, "'#{self}' has no public instance method '#{action}' defined!")
@@ -18,8 +18,8 @@ module Documentary
       end
     end
 
-    def params_of(method)
-      self.class.params[method.to_sym]
+    def authorized_params(action)
+      self.class.params[action.to_sym]&.authorized_params(self)
     end
 
     private
@@ -30,8 +30,8 @@ module Documentary
 
     def describe_params
       respond_to do |format|
-        format.json { render json: params_of(action_name) }
-        format.xml { render xml: params_of(action_name) }
+        format.json { render json: authorized_params(action_name) }
+        format.xml { render xml: authorized_paramsf(action_name) }
       end
     end
   end

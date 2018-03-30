@@ -6,25 +6,24 @@ module Documentary
       recursive_each(self)
     end
 
-    def authorized_params
-      dup.tap { |store| make_sure_top_level_keys_included(store.delete_unauthorized) }
+    def authorized_params(controller)
+      dup.tap { |store| (store.delete_unauthorized(controller)) }
     end
 
     protected
 
-    def delete_unauthorized
+    def delete_unauthorized(controller)
       delete_if do |k, v|
         next unless v.instance_of?(Store)
-        (v[:if] && !v[:if].call) || v.delete_unauthorized.empty?
+        (v[:if] && !evaluate_if(v[:if], controller)) || v.delete_unauthorized(controller).empty?
       end
     end
 
     private
 
-    def make_sure_top_level_keys_included(allowed_params)
-      each_key do |key|
-        allowed_params[key] = Store.new unless allowed_params[key]
-      end
+    def evaluate_if(symbol_or_proc, controller)
+      return symbol_or_proc.call(controller) if symbol_or_proc.respond_to?(:call)
+      return controller.send(symbol_or_proc) if symbol_or_proc.is_a?(Symbol)
     end
 
     def recursive_each(hash)

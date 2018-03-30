@@ -85,7 +85,7 @@ end
 
 
 - [X] Strong Paramters
-- [ ] Authorization
+- [X] Authorization
 - [ ] Swagger compatible output
 
 ## License
