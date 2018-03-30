@@ -6,7 +6,7 @@ module Documentary
       recursive_each(self)
     end
 
-    def authorized
+    def authorized_params
       dup.tap { |store| make_sure_top_level_keys_included(store.delete_unauthorized) }
     end
 

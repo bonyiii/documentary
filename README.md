@@ -22,17 +22,16 @@ Or install it yourself as:
 
 ## Usage
 
-Include Documentar in your controller:
-
+Include ```Documentary::Params``` in your controller:
 
 ``` ruby
 class ApplicationController < ActionController::Base
   include Documentary::Params
-  protect\_from\_forgery
+  protect_from_forgery
 end
 ```
 
-You can define params for each action in your controller:
+Define params for each action in your controller:
 
 ``` ruby
 class CarsController < ApplicationController
@@ -47,23 +46,42 @@ class CarsController < ApplicationController
 end
 ```
 
-By default param names should be symbols but strings are allowed too.
 A param can be:
   - optional
   - required
 
-A param definition consist the following elements:
+Param definition consists following elements:
 
-  - name: Name of the argument (compulsory)
+  - Param Name: Name of the argument (compulsory)
+    - Can be a symbol or string
   - Keyword arguments (all are optional):
-	  - type: Can be anything that respond to to_s
+	  - type: Can be anything that respond to ```to_s```
 	  - desc: Describe what the given parameter does
 	  - if: Response will include the given param if evaluated true
 		  -  Expects a symbol or a proc, any kind of authorization logic can be implemented.
 		  - For proc will receive controller instance as input parameter.
 		  - For symbol it will call an instance method with that name on the controller
 
-## Compatibility
+### Querying the documentation
+
+When a request header include ```Describe-Params``` then the params documentation will be returned
+for given controller action and the action will not run.
+
+By default every controller which includes ```Documentar::Params``` will mix in ```describe_params```
+method which can respond with json and xml format.
+
+```ruby
+def describe_params
+  respond_to do |format|
+    format.json { render json: params_of(action_name) }
+    format.xml { render xml: params_of(action_name) }
+  end
+end
+```
+
+```describe_params``` can be overriden per controller basis to support other formats, for example: YAML.
+
+## Features
 
 
 - [X] Strong Paramters

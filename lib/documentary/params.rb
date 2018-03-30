@@ -3,10 +3,10 @@ module Documentary
     extend ActiveSupport::Concern
 
     included do
-      before_action :describe_params
+      before_action :describe_params, if: :describe_params?
 
       def self.params(action = nil, **_args, &block)
-        return @store.authorized unless action
+        return @store.authorized_params unless action
 
         unless public_method_defined?(action)
           raise(Documentary::PublicMethodMissing, "'#{self}' has no public instance method '#{action}' defined!")
@@ -24,12 +24,14 @@ module Documentary
 
     private
 
+    def describe_params?
+      request.headers['Describe-Params']
+    end
+
     def describe_params
-      if request.headers['Describe-Params']
-        respond_to do |format|
-          format.json { render json: params_of(action_name) }
-          format.xml { render xml: params_of(action_name) }
-        end
+      respond_to do |format|
+        format.json { render json: params_of(action_name) }
+        format.xml { render xml: params_of(action_name) }
       end
     end
   end
