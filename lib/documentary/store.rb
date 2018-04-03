@@ -15,7 +15,7 @@ module Documentary
     def delete_unauthorized(controller)
       delete_if do |k, v|
         next unless v.instance_of?(Store)
-        (v[:if] && !evaluate_if(v[:if], controller)) || v.delete_unauthorized(controller).empty?
+        (v[:if] && !evaluate_if(v.delete(:if), controller)) || v.delete_unauthorized(controller).empty?
       end
     end
 
@@ -30,14 +30,8 @@ module Documentary
       hash.map do |key, value|
         if nested?(value)
           { key => recursive_each(value) }
-        else
-          if value.is_a?(Hash)
-            if value[:type] == Array.to_s
-              { key => [] }
-            else
-              key
-            end
-          end
+        elsif value.is_a?(Hash)
+          value[:type] == Array.to_s ? { key => [] } : key
         end
       end.compact
     end

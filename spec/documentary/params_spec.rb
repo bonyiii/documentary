@@ -203,6 +203,7 @@ RSpec.describe Documentary::Params do
         context 'when params is allowed' do
           before { expect(subject).to receive(:allowed?).and_return(true) }
           it { expect(subject.authorized_params(:show)).to include(:type) }
+          it { expect(subject.authorized_params(:show)[:type]).not_to include(:if) }
         end
 
         context 'when params is not allowed' do
