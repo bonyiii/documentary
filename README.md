@@ -86,6 +86,8 @@ end
 
 - [X] Strong Paramters
 - [X] Authorization
+- [ ] Generate test ?
+- [ ] Raise error if required param is missing
 - [ ] Swagger compatible output
 
 ## License

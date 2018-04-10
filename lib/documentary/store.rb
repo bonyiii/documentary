@@ -3,7 +3,7 @@ module Documentary
   # to strong parameters
   class Store < Hash
     def to_strong
-      recursive_each(self)
+      convert_to_stong_param(self)
     end
 
     def authorized_params(controller)
@@ -15,7 +15,7 @@ module Documentary
     def delete_unauthorized(controller)
       delete_if do |k, v|
         next unless v.instance_of?(Store)
-        (v[:if] && !evaluate_if(v.delete(:if), controller)) || v.delete_unauthorized(controller).empty?
+        (v[:authorized] && !evaluate_if(v.delete(:authorized), controller)) || v.delete_unauthorized(controller).empty?
       end
     end
 
@@ -26,10 +26,10 @@ module Documentary
       return controller.send(symbol_or_proc) if symbol_or_proc.is_a?(Symbol)
     end
 
-    def recursive_each(hash)
+    def convert_to_stong_param(hash)
       hash.map do |key, value|
         if nested?(value)
-          { key => recursive_each(value) }
+          { key => convert_to_stong_param(value) }
         elsif value.is_a?(Hash)
           value[:type] == Array.to_s ? { key => [] } : key
         end

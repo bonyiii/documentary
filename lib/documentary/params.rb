@@ -37,7 +37,7 @@ module Documentary
   end
 
   class ParamBuilder
-    VALID_OPTIONS = [:if].freeze # :nodoc:
+    VALID_OPTIONS = [:authorized].freeze # :nodoc:
     attr_reader :store
 
     def self.build(&block)
@@ -69,7 +69,7 @@ module Documentary
       store[param][:required] = required
       store[param][:type] = type.to_s if type
       store[param][:desc] = desc if desc
-      store[param][:if] = args[:if] if args[:if]
+      store[param][:authorized] = args[:authorized] if args[:authorized]
     end
   end
 end

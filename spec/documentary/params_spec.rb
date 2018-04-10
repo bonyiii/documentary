@@ -123,7 +123,7 @@ RSpec.describe Documentary::Params do
 
         before do
           controller_class.params :show do
-            optional(:type, if: ->(controller) { false })
+            optional(:type, authorized: ->(controller) { false })
           end
         end
 
@@ -138,7 +138,7 @@ RSpec.describe Documentary::Params do
 
         before do
           controller_class.params :show do
-            optional(:type, if: ->(controller) { false })
+            optional(:type, authorized: ->(controller) { false })
           end
 
           # Set up edit method here
@@ -163,7 +163,7 @@ RSpec.describe Documentary::Params do
 
         before do
           controller_class.params :show do
-            optional(:type, if: ->(controller) { false })
+            optional(:type, authorized: ->(controller) { false })
             required :name
           end
         end
@@ -178,7 +178,7 @@ RSpec.describe Documentary::Params do
           controller_class.params :show do
             optional(:type)
             required(:vintage, type: Array) do
-              required(:year, type: Integer, desc: 'Year of the vintage', if: ->(controller) { false })
+              required(:year, type: Integer, desc: 'Year of the vintage', authorized: ->(controller) { false })
               optional(:month, type: Integer)
             end
           end
@@ -195,7 +195,7 @@ RSpec.describe Documentary::Params do
 
         before do
           controller_class.params :show do
-            optional(:type, if: ->(controller) { controller.allowed? })
+            optional(:type, authorized: ->(controller) { controller.allowed? })
             required :name
           end
         end
@@ -217,7 +217,7 @@ RSpec.describe Documentary::Params do
 
         before do
           controller_class.params :show do
-            optional(:type, if: proc { true })
+            optional(:type, authorized: proc { true })
             required :name
           end
         end
@@ -232,7 +232,7 @@ RSpec.describe Documentary::Params do
 
         before do
           controller_class.params :show do
-            optional(:type, if: :allowed?)
+            optional(:type, authorized: :allowed?)
             required :name
           end
         end
