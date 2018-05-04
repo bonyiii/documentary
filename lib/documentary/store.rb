@@ -6,6 +6,10 @@ module Documentary
       convert_to_stong_param(self)
     end
 
+    def to_swagger
+      { parameters: convert_to_swagger(self) }
+    end
+
     def authorized_params(controller)
       dup.tap { |store| (store.delete_unauthorized(controller)) }
     end
@@ -38,6 +42,19 @@ module Documentary
 
     def nested?(value)
       value.is_a?(Hash) && !(value.keys - %i[type desc required if]).empty?
+    end
+
+    def convert_to_swagger(hash)
+      hash.map do |key, value|
+        doc = {
+          name: key.to_s,
+          in: 'formData',
+          type: (value[:type] || 'string').downcase,
+          required: value[:required]
+        }
+        doc[:description] = value[:desc] if value[:desc]
+        doc
+      end
     end
   end
 end
