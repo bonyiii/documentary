@@ -27,6 +27,8 @@ Or install it yourself as:
 
 ## Usage
 
+![alt text](https://raw.githubusercontent.com/bonyiii/documentary/master/docs/documentary_demo_small.gif)
+
 Include ```Documentary::Params``` in your controller:
 
 ``` ruby
