@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/bonyiii/documentary.svg?branch=master)](https://travis-ci.org/bonyiii/documentary)
+[![Build Status](https://semaphoreci.com/api/v1/bonyiii/documentary/branches/master/badge.svg)](https://semaphoreci.com/bonyiii/documentary)
 
 # Documentary
 
